@@ -2,7 +2,7 @@ name: Daily Video Upload
 
 on:
   schedule:
-    - cron: '0 10 * * *' # Runs every day at 10:00 AM UTC (3:30 PM IST)
+ #   - cron: '0 18 * * *' 
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:
