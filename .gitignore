@@ -1,0 +1,10 @@
+.env
+token.json
+client_secrets.json
+.venv/
+__pycache__/
+*.mp4
+*.png
+*.mp3
+.DS_Store
+processed_repos.json
