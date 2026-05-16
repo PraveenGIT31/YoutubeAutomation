@@ -8,6 +8,9 @@ on:
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
     steps:
     - uses: actions/checkout@v3
     
@@ -38,3 +41,11 @@ jobs:
         
     - name: Run Pipeline
       run: python main.py --auto
+      
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git add processed_repos.json
+        git commit -m "Update processed repos list [skip ci]" || echo "No changes to commit"
+        git push

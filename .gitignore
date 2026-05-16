@@ -7,4 +7,3 @@ __pycache__/
 *.png
 *.mp3
 .DS_Store
-processed_repos.json
