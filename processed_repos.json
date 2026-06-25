@@ -42,5 +42,6 @@
     "https://github.com/whisper-money/whisper-money",
     "https://github.com/Kopuz-org/kopuz",
     "https://github.com/Kidabah/flightdeck",
-    "https://github.com/QwenLM/Qwen-AgentWorld"
+    "https://github.com/QwenLM/Qwen-AgentWorld",
+    "https://github.com/facebookresearch/ProgramBench"
 ]
