@@ -1,6 +1,7 @@
 import os
 import json
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,7 +14,7 @@ def generate_video_content(topic, duration):
     if not api_key:
         raise ValueError("GEMINI_API_KEY not found in .env file.")
         
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
     
     # Calculate approximate word count (average 2.5 words per second)
     word_count = int(duration) * 2.5
@@ -35,8 +36,10 @@ def generate_video_content(topic, duration):
     "search_query": "A simple 1 or 2 word search term to find a background stock video for this topic on Pexels (e.g. 'technology', 'space', 'robot')"
     """
     
-    model = genai.GenerativeModel('gemini-2.5-flash')
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=prompt,
+    )
     
     # Parse the JSON response
     text = response.text
@@ -57,7 +60,7 @@ def generate_video_content(topic, duration):
 
 def generate_thumbnail(topic, output_filename="thumbnail.png"):
     """
-    Generates a thumbnail image using Gemini's image generation capabilities.
+    Generates a thumbnail image using Gemini's image generation capabilities (Imagen 3).
     If the API key does not have image generation access, it will fail gracefully.
     """
     api_key = os.getenv("GEMINI_API_KEY")
@@ -65,39 +68,55 @@ def generate_thumbnail(topic, output_filename="thumbnail.png"):
         print("GEMINI_API_KEY not found. Skipping thumbnail generation.")
         return None
         
-    genai.configure(api_key=api_key)
     print(f"Generating thumbnail for topic: {topic}...")
     
     try:
-        # Some Gemini tiers support Imagen via the generative models API
-        model = genai.ImageGenerationModel("imagen-3.0-generate-001")
+        client = genai.Client(api_key=api_key)
         
         prompt = f"A high quality, modern, YouTube thumbnail style illustration for a developer tool about: {topic}. Vibrant colors, highly detailed, visually striking, minimalist."
         
-        result = model.generate_images(
+        response = client.models.generate_images(
+            model='imagen-4.0-fast-generate-001',
             prompt=prompt,
-            number_of_images=1,
-            aspect_ratio="16:9",
-            output_mime_type="image/png"
+            config=types.GenerateImagesConfig(
+                number_of_images=1,
+                output_mime_type="image/png",
+                aspect_ratio="9:16",
+            )
         )
         
-        if result and result.images:
-            image = result.images[0]
+        if response.generated_images:
+            image_data = response.generated_images[0].image.image_bytes
             with open(output_filename, "wb") as f:
-                f.write(image.image.image_bytes)
+                f.write(image_data)
             print(f"Thumbnail successfully generated and saved to {output_filename}")
             return output_filename
         else:
             print("No image was returned from the API.")
             return None
     except Exception as e:
-        print(f"Thumbnail generation failed (might require Imagen access): {e}")
+        print(f"Thumbnail generation failed: {e}")
         return None
 
 if __name__ == "__main__":
     # Test the module
     topic = "The history of Artificial Intelligence"
     duration = 30
-    print(f"Generating content for: {topic}")
+    
+    # List models to see what's available
+    print("Available models:")
+    from google import genai
+    api_key = os.getenv("GEMINI_API_KEY")
+    client = genai.Client(api_key=api_key)
+    try:
+        for m in client.models.list():
+            if "imagen" in m.name.lower():
+                print(m.name)
+    except Exception as e:
+        print(f"Failed to list models: {e}")
+            
+    print(f"\nGenerating content for: {topic}")
     result = generate_video_content(topic, duration)
     print(json.dumps(result, indent=2))
+    
+

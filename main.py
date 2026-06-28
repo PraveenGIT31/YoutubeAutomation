@@ -70,8 +70,9 @@ def main():
         try:
             asyncio.run(take_screenshot(repo_url, screenshot_path))
         except Exception as e:
-            print(f"Screenshot failed: {e}")
-            screenshot_path = None
+            print(f"❌ Error: Screenshot capture failed: {e}")
+            print("Aborting pipeline to prevent uploading blank/black video to YouTube.")
+            raise e
     else:
         print("\n[3/5] No repo URL provided for screenshot. Will use fallback.")
         screenshot_path = None

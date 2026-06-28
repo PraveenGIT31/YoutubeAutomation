@@ -103,10 +103,10 @@ def create_scrolling_video_from_image(image_path, audio_path, output_path="final
             from moviepy import VideoClip
             video_clip = VideoClip(make_frame, duration=target_duration)
         else:
-            # If it's shorter, just pad or scale to fit
-            video_clip = scaled_img.with_duration(target_duration)
-            # Center it vertically
-            video_clip = video_clip.margin(top=int((target_h-scaled_h)/2), bottom=int((target_h-scaled_h)/2), color=(0,0,0))
+            # If it's shorter, center it on a black background
+            background = ColorClip(size=(target_w, target_h), color=(0,0,0), duration=target_duration)
+            centered_img = scaled_img.with_duration(target_duration).with_position('center')
+            video_clip = CompositeVideoClip([background, centered_img])
                 
     # Set the audio
     final_clip = video_clip.with_audio(audio_clip)
